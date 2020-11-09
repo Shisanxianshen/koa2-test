@@ -16,10 +16,10 @@ let taskMoulde = file.filter((f)=>{
     return f
   }
 })
-let takkList = []
+let taskList = []
 // 导入所有js
 taskMoulde.forEach(item => {
-  takkList.push(require(__dirname + '/controller/' + item)) 
+  taskList.push(require(__dirname + '/controller/' + item)) 
 })
 // 集中处理请求（对于user不进行检测token）
 app.use(async(ctx,next)=>{
@@ -38,7 +38,8 @@ app.use(async(ctx,next)=>{
     await next()
   }
 })
-takkList.forEach(item =>{
+
+taskList.forEach(item =>{
   for(let i in item){
     if(/^POST\//.test(i)){
       router.post(i.substring(4),item[i])
