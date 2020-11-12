@@ -1,18 +1,18 @@
 // 使用邮箱验证功能（发送验证码）
 const nodemailer = require("nodemailer")
-
 let transporter = nodemailer.createTransport({
-  service:'163',//使用内置的163发送邮件
+  host:'smtp.163.com',//使用内置的163发送邮件
   auth: {
     user: "15163575932@163.com",
-    pass: "TKEHETENCVUKGSVQ",
+    pass: "SJPLBCHBKHIIQCLF",
   },
 })
-
 // 邮件服务器准备
 transporter.verify(function (error, success) {
   if (error) {
     console.log(error)
+  }else{
+    console.log('Server is ready')
   }
 })
 
