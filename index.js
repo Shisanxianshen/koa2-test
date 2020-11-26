@@ -4,13 +4,11 @@ const router = require('koa-router')()
 const bodyParse = require('koa-bodyparser')
 const fs = require('fs')
 const jwt = require('./utils/token')
-const history = require('koa2-connect-history-api-fallback')
 // 获得本机host地址
 const app = new koa()
 app.use(cors({
   credentials: true,
 }))
-app.use(history())
 // 对于不同模块请求进行处理
 let file = fs.readdirSync(__dirname + '/controller')
 let taskMoulde = file.filter((f)=>{
