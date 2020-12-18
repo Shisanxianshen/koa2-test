@@ -1,6 +1,9 @@
 const db = require("../database/index.js")
 const transporter = require("../sendMail/index")
 const jwt = require("../utils/token")
+const fs = require("fs")
+const path = require("path")
+const copyFile = require("../utils/copyfile")
 // 登录验证
 const login_fn = async (ctx, next) => {
   let data = await db(
@@ -15,6 +18,8 @@ const login_fn = async (ctx, next) => {
     let params = {
       name: data[0].name,
       email: data[0].email,
+      id: data[0].id,
+      head: data[0].head,
     }
     ctx.body = {
       code: 0,
@@ -24,20 +29,30 @@ const login_fn = async (ctx, next) => {
 }
 // 获取用户信息
 const getUserInfo = async (ctx, next) => {
-  ctx.set('Cache-Control','no-catch')
-  ctx.cookies.set('check','3760314830')
+  const data = await db(`SELECT * FROM user WHERE id='${ctx.request.userInfo.id}'`).catch(err => err)
+  if(!data.length){
+    return ctx.body = {
+      code: 1001,
+      data:'',
+    }
+  }
   ctx.body = {
     code: 0,
-    data: ctx.request.userInfo,
+    data: data[0],
   }
 }
 
 // 注册
 const register_fn = async (ctx, next) => {
   // 验证码检测：
-  const codeData = await db(`SELECT * FROM email WHERE email = '${ctx.request.body.email}'`).catch(err => console.log(err))
-  let nowTimer = new Date().getTime()/1000 >> 0
-  if(ctx.request.body.code != codeData[0].code || nowTimer - codeData[0].timer > 60){
+  const codeData = await db(
+    `SELECT * FROM email WHERE email = '${ctx.request.body.email}'`
+  ).catch((err) => console.log(err))
+  let nowTimer = (new Date().getTime() / 1000) >> 0
+  if (
+    ctx.request.body.code != codeData[0].code ||
+    nowTimer - codeData[0].timer > 60
+  ) {
     ctx.body = {
       code: 1001,
       msg: "验证码已失效或错误",
@@ -62,6 +77,8 @@ const register_fn = async (ctx, next) => {
     let params = {
       name: ctx.request.body.name,
       email: ctx.request.body.email,
+      id: data.insertId,
+      head: null,
     }
     ctx.body = {
       code: 0,
@@ -109,9 +126,42 @@ const getCode_fn = async (ctx, next) => {
   }
 }
 
+// 上传头像
+const setHead = async (ctx, next) => {
+  const file = ctx.request.files.file
+  // 检测是否存在upload文件夹，如果没有就创建，有的话就将图片存入upload
+  const fileList = fs.readdirSync(path.resolve(__dirname, "../../"))
+  const outPath = path
+  .resolve(__dirname, `../../upload/${Date.now() + file.name}`)
+  .split(path.sep)
+  .join("/")
+  if (fileList.includes("upload")) {
+    copyFile(
+      ctx,
+      file.path.split(path.sep).join("/"),
+      outPath
+    )
+  } else {
+    fs.mkdirSync(
+      path.resolve(__dirname, "../../upload").split(path.sep).join("/")
+    )
+    copyFile(
+      ctx,
+      file.path.split(path.sep).join("/"),
+      outPath
+    )
+  }
+  ctx.body = {
+    code: 0,
+    data: "success",
+    headSrc:outPath,
+  }
+}
+
 module.exports = {
   "POST/user/login": login_fn,
   "POST/user/register": register_fn,
   "POST/user/getCode": getCode_fn,
+  "POST/user/setHead/:id": setHead,
   "GET/getUserInfo": getUserInfo,
 }

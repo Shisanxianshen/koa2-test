@@ -9,13 +9,13 @@ let transporter = nodemailer.createTransport({
   },
 })
 // 邮件服务器准备
-transporter.verify(function (error, success) {
-  if (error) {
-    console.log(error)
-  }else{
-    console.log('Server is ready')
-  }
-})
+// transporter.verify(function (error, success) {
+//   if (error) {
+//     console.log(error)
+//   }else{
+//     console.log('Server is ready')
+//   }
+// })
 
 module.exports = transporter
   
