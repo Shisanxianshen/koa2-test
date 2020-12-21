@@ -39,6 +39,7 @@ const getUserInfo = async (ctx, next) => {
   ctx.body = {
     code: 0,
     data: data[0],
+    token: jwt.createToken(data[0])
   }
 }
 
