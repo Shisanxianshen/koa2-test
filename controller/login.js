@@ -152,6 +152,7 @@ const setHead = async (ctx, next) => {
       outPath
     )
   }
+
   ctx.body = {
     code: 0,
     data: "success",
