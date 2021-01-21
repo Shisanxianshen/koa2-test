@@ -29,17 +29,10 @@ const login_fn = async (ctx, next) => {
 }
 // 获取用户信息
 const getUserInfo = async (ctx, next) => {
-  const data = await db(`SELECT * FROM user WHERE id='${ctx.request.userInfo.id}'`).catch(err => err)
-  if(!data.length){
-    return ctx.body = {
-      code: 1001,
-      data:'',
-    }
-  }
+
   ctx.body = {
     code: 0,
-    data: data[0],
-    token: jwt.createToken(data[0])
+    data: ctx.request.userInfo,
   }
 }
 
