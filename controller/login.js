@@ -29,10 +29,12 @@ const login_fn = async (ctx, next) => {
 }
 // 获取用户信息
 const getUserInfo = async (ctx, next) => {
-
+  let data = await db(
+    `SELECT * FROM user WHERE email = '${ctx.request.userInfo.email}'`
+  ).catch((err) => err)
   ctx.body = {
     code: 0,
-    data: ctx.request.userInfo,
+    data: data[0],
   }
 }
 
@@ -126,30 +128,21 @@ const setHead = async (ctx, next) => {
   // 检测是否存在upload文件夹，如果没有就创建，有的话就将图片存入upload
   const fileList = fs.readdirSync(path.resolve(__dirname, "../../"))
   const outPath = path
-  .resolve(__dirname, `../../upload/${Date.now() + file.name}`)
-  .split(path.sep)
-  .join("/")
+    .resolve(__dirname, `../../upload/${Date.now() + file.name}`)
+    .split(path.sep)
+    .join("/")
   if (fileList.includes("upload")) {
-    copyFile(
-      ctx,
-      file.path.split(path.sep).join("/"),
-      outPath
-    )
+    copyFile(ctx, file.path.split(path.sep).join("/"), outPath)
   } else {
     fs.mkdirSync(
       path.resolve(__dirname, "../../upload").split(path.sep).join("/")
     )
-    copyFile(
-      ctx,
-      file.path.split(path.sep).join("/"),
-      outPath
-    )
+    copyFile(ctx, file.path.split(path.sep).join("/"), outPath)
   }
-
   ctx.body = {
     code: 0,
     data: "success",
-    headSrc:outPath,
+    headSrc: outPath,
   }
 }
 
