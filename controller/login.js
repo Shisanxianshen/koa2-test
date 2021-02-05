@@ -32,6 +32,7 @@ const getUserInfo = async (ctx, next) => {
   let data = await db(
     `SELECT * FROM user WHERE email = '${ctx.request.userInfo.email}'`
   ).catch((err) => err)
+  ctx.cookies.set('ceshi','15163575932',{httpOnly: false});
   ctx.body = {
     code: 0,
     data: data[0],
