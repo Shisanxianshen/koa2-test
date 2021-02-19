@@ -6,6 +6,12 @@ const pathResolve = require("../utils/pathResolve")
 
 // 保存文章
 const saveArticle = async (ctx) => {
+  if(ctx.request.body.author !== 'dmg'){
+    ctx.body = {
+      msg:'没有权限发布文章！'
+    }
+    return
+  }
   const data = await db(
     `INSERT INTO article (title,content,module,author,introduce) VALUES ('${ctx.request.body.title}','${ctx.request.body.content}','${ctx.request.body.module}','${ctx.request.body.author}','${ctx.request.body.introduce}')`
   ).catch((err) => {
@@ -53,30 +59,39 @@ const deleteImage = async (ctx) => {
 // 获取文章列表
 const getArticleList = async (ctx) => {
   const data = await db(
-    `SELECT * FROM article` +
+    `SELECT id, title, module, author, introduce FROM article` +
       (!ctx.request.body.module
         ? ""
-        : ` WHERE module = '${ctx.request.body.module}'`) + ' ORDER BY id DESC'
+        : ` WHERE module = '${ctx.request.body.module}'`) +
+      ` ORDER BY id DESC LIMIT ${ctx.request.body.pageSize} OFFSET ${ctx.request.body.page * ctx.request.body.pageSize}`
+  ).catch((err) => {
+    throw err
+  })
+  const total = await db(
+    `SELECT COUNT(*) num FROM article` +
+      (!ctx.request.body.module
+        ? ""
+        : ` WHERE module = '${ctx.request.body.module}'`)
+  ).catch(err => {
+    throw err
+  })
+  ctx.body = {
+    code: 0,
+    data: data,
+    total: total[0].num,
+  }
+}
+
+// 获取文章详情
+const getArticleDetail = async (ctx) => {
+  const data = await db(
+    `SELECT * FROM article WHERE id = '${ctx.request.url.split("/").pop()}'`
   ).catch((err) => {
     throw err
   })
   ctx.body = {
     code: 0,
-    data: data.map(item => {
-      delete item.content
-      return item
-    }),
-  }
-}
-
-// 获取文章详情
-const getArticleDetail = async ctx => {
-  const data = await db(`SELECT * FROM article WHERE id = '${ctx.request.url.split('/').pop()}'`).catch(err => {
-    throw err
-  })
-  ctx.body = {
-    code:0,
-    data:data[0],
+    data: data[0],
   }
 }
 
@@ -84,6 +99,6 @@ module.exports = {
   "POST/saveArticle": saveArticle,
   "POST/uploadImage": uploadImage,
   "POST/deleteImage": deleteImage,
-  "POST/getArticleList": getArticleList,
-  "POST/getArticleDetail/:id": getArticleDetail,
+  "POST/user/getArticleList": getArticleList,
+  "POST/user/getArticleDetail/:id": getArticleDetail,
 }
