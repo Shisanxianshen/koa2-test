@@ -140,10 +140,15 @@ const setHead = async (ctx, next) => {
     )
     copyFile(ctx, file.path.split(path.sep).join("/"), outPath)
   }
+  let params = {
+    ...ctx.request.userInfo,
+    head:outPath,
+  }
   ctx.body = {
     code: 0,
     data: "success",
     headSrc: outPath,
+    token: jwt.createToken(params),
   }
 }
 
