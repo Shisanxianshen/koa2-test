@@ -144,6 +144,7 @@ const setHead = async (ctx, next) => {
     ...ctx.request.userInfo,
     head:outPath,
   }
+  console.log(params)
   ctx.body = {
     code: 0,
     data: "success",
@@ -156,6 +157,6 @@ module.exports = {
   "POST/user/login": login_fn,
   "POST/user/register": register_fn,
   "POST/user/getCode": getCode_fn,
-  "POST/user/setHead/:id": setHead,
+  "POST/setHead/:id": setHead,
   "GET/getUserInfo": getUserInfo,
 }
